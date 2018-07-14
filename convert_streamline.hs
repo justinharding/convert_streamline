@@ -11,10 +11,17 @@ main = do
   -- print (intercalate "\nxx" (takeEvery 4 1 content))
   -- mapM_ putStrLn (takeEvery 4 1 content)
   mapM_ (prettyPrint "***") (takeEvery 3 1 content)
+  mapM_ (mapM_ (prettyPrint "%%%")) (splitEvery 3 content)
+  mapM_ ((prettyPrint "$$$") . head) (splitEvery 3 content)
 
 
 takeEvery :: (Eq a, Num a, Enum a) => a -> a -> [b] -> [b]
 takeEvery n offset = map snd . filter ((==offset) . fst) . zip (cycle[1..n])
+
+splitEvery :: Int -> [a] -> [[a]]
+splitEvery _ [] = []
+splitEvery n xs = as : splitEvery n bs
+  where (as, bs) = splitAt n xs
 
 intercalate :: [a] -> [[a]] -> [a]
 -- intercalate xs xss = concat (intersperse xs xss)
