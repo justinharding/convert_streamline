@@ -28,7 +28,7 @@ trim = f . f
   where f = reverse . dropWhile isSpace
 
 startsWith :: Char -> String -> Bool
-startsWith c [] = False
+startsWith _ [] = False
 startsWith c (x:xs) = x == c
 
 isCommentOrBlank :: String -> Bool
