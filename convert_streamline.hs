@@ -13,7 +13,7 @@ main = do
   mapM_ (prettyPrint "***") (takeEvery 3 1 content)
 
 
-takeEvery :: (Eq a, Num a, Num a, Enum a) => a -> a -> [b] -> [b]
+takeEvery :: (Eq a, Num a, Enum a) => a -> a -> [b] -> [b]
 takeEvery n offset = map snd . filter ((==offset) . fst) . zip (cycle[1..n])
 
 intercalate :: [a] -> [[a]] -> [a]
