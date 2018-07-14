@@ -33,4 +33,6 @@ startsWith c (x:xs) = x == c
 
 isCommentOrBlank :: String -> Bool
 isCommentOrBlank s = not (null s) && not(startsWith ';' s)
+-- isCommentOrBlank s = (not . null) s && (not . startsWith ';') s
+-- isCommentOrBlank = ap ((&&) . not . null) (not . startsWith (';'))
 
