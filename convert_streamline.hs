@@ -5,14 +5,18 @@ type Transaction = (String, String, String, String)
 main :: IO ()
 main = do
   fileContent <- readFile "test.journal"
-  let content = filter (isCommentOrBlank) (map trim (lines fileContent))
+  -- let content = filter (isNotCommentOrBlank) (map trim (lines fileContent))
+  let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
+
+  mapM_ (mapM_ (prettyPrint "%%%")) transactions
+
 
   -- print content
   -- print (intercalate "\nxx" (takeEvery 4 1 content))
   -- mapM_ putStrLn (takeEvery 4 1 content)
-  mapM_ (prettyPrint "***") (takeEvery 3 1 content)
-  mapM_ (mapM_ (prettyPrint "%%%")) (splitEvery 3 content)
-  mapM_ ((prettyPrint "$$$") . head) (splitEvery 3 content)
+  -- mapM_ (prettyPrint "***") (takeEvery 3 1 content)
+  -- mapM_ (mapM_ (prettyPrint "%%%")) (splitEvery 3 content)
+  -- mapM_ ((prettyPrint "$$$") . head) (splitEvery 3 content)
 
 
 takeEvery :: (Eq a, Num a, Enum a) => a -> a -> [b] -> [b]
@@ -22,6 +26,18 @@ splitEvery :: Int -> [a] -> [[a]]
 splitEvery _ [] = []
 splitEvery n xs = as : splitEvery n bs
   where (as, bs) = splitAt n xs
+
+-- takeAllIndentedOrBlank :: [String] -> [[String]]
+-- takeAllIndentedOrBlank [] = []
+-- takeAllIndentedOrBlank (x:xs)
+--                   | isFirstLineOfTransaction x = [x] : takeAllIndentedOrBlank xs
+
+splitIntoTransactions :: (a -> Bool) -> [a] -> [[a]]
+splitIntoTransactions predicate [] = []
+splitIntoTransactions predicate (x:xs) = go [x] xs
+  where go acc [] = [acc]
+        go acc (y:ys) | predicate y = acc : go [y] ys
+                      | otherwise = go (acc++[y]) ys
 
 intercalate :: [a] -> [[a]] -> [a]
 -- intercalate xs xss = concat (intersperse xs xss)
@@ -38,8 +54,13 @@ startsWith :: Char -> String -> Bool
 startsWith _ [] = False
 startsWith c (x:xs) = x == c
 
-isCommentOrBlank :: String -> Bool
-isCommentOrBlank s = not (null s) && not(startsWith ';' s)
--- isCommentOrBlank s = (not . null) s && (not . startsWith ';') s
--- isCommentOrBlank = ap ((&&) . not . null) (not . startsWith (';'))
+isNotCommentOrBlank :: String -> Bool
+isNotCommentOrBlank s = not (null s) && not(startsWith ';' s)
+
+isBlank :: String -> Bool
+isBlank s = all isSpace s
+
+isFirstLineOfTransaction :: String -> Bool
+isFirstLineOfTransaction [] = False
+isFirstLineOfTransaction (x:xs) = not $ elem x " ;"
 
