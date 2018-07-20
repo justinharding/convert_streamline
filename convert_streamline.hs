@@ -1,4 +1,6 @@
 import Data.Char (isSpace)
+import Data.List (isInfixOf)
+import Data.List.Utils
 
 type Transaction = (String, String, String, String)
 
@@ -28,16 +30,15 @@ prettyPrint :: String -> String -> IO ()
 prettyPrint decoration s = putStrLn (decoration ++ s ++ decoration)
 
 modifyTransaction :: String -> String -> String -> [String] -> [String]
-modifyTransaction t1 t2 r (x:xs)
-    | x == t1 = x : modifyCategory t2 r xs
+modifyTransaction search1 search2 replaceString (x:xs)
+    | isInfixOf search1 x = x : modifyCategory search2 replaceString xs
     | otherwise = x : xs
 
 modifyCategory :: String -> String -> [String] -> [String]
 modifyCategory _ _ [] = []
-modifyCategory search replace (x:xs)
-    | null x = []
-    | x == search = replace : xs
-    | otherwise = x : modifyCategory search replace xs
+modifyCategory searchString replaceString (x:xs)
+    | isInfixOf searchString x = replace searchString replaceString x : xs
+    | otherwise = x : modifyCategory searchString replaceString xs
 
 isFirstLineOfTransaction :: String -> Bool
 isFirstLineOfTransaction [] = False
