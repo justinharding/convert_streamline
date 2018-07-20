@@ -8,6 +8,8 @@ main = do
   let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
   -- mapM_ (printTransaction decorateLine decorateTransaction) transactions
   mapM_ (printTransaction "" (return ())) transactions
+  let newTransactions = map (modifyTransaction "testValue" "testValue2" "newValue") transactions
+  mapM_ (printTransaction "" (return ())) newTransactions
 
 splitIntoTransactions :: (a -> Bool) -> [a] -> [[a]]
 splitIntoTransactions predicate [] = []
@@ -24,6 +26,18 @@ printTransaction decorateLine decorateTransaction transaction = do
 
 prettyPrint :: String -> String -> IO ()
 prettyPrint decoration s = putStrLn (decoration ++ s ++ decoration)
+
+modifyTransaction :: String -> String -> String -> [String] -> [String]
+modifyTransaction t1 t2 r (x:xs)
+    | x == t1 = x : modifyCategory t2 r xs
+    | otherwise = x : xs
+
+modifyCategory :: String -> String -> [String] -> [String]
+modifyCategory _ _ [] = []
+modifyCategory search replace (x:xs)
+    | null x = []
+    | x == search = replace : xs
+    | otherwise = x : modifyCategory search replace xs
 
 isFirstLineOfTransaction :: String -> Bool
 isFirstLineOfTransaction [] = False
