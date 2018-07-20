@@ -10,7 +10,7 @@ main = do
   let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
   -- mapM_ (printTransaction decorateLine decorateTransaction) transactions
   mapM_ (printTransaction "" (return ())) transactions
-  let newTransactions = map (modifyTransaction "testValue" "testValue2" "newValue") transactions
+  let newTransactions = map (modifyTransaction "MITRE 10" "Expenses:Misc" "Expenses:Hardware") transactions
   mapM_ (printTransaction "" (return ())) newTransactions
 
 splitIntoTransactions :: (a -> Bool) -> [a] -> [[a]]
