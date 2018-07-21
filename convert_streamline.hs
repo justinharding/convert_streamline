@@ -77,23 +77,19 @@ decorateTransaction = putStrLn ""
 loadDictionary = do
     content <- readFile "translations.txt"
     let stuff = convert $ filter isNotBlank $ lines content
-    -- mapM_ (putStrLn . fst3) stuff
     return stuff
 
 convert :: [String] -> [(String, String, String)]
 convert list = map parse list
 
 parse :: String -> (String, String, String)
-parse s = makeTuple s
+parse = toTuple . map strip . split ","
 
-valid :: String -> Bool
-valid s = isInfixOf s "," && (head s) /= '#'
+-- valid :: String -> Bool
+-- valid s = isInfixOf s "," && (head s) /= '#'
 
-makeTuple :: String -> (String, String, String)
-makeTuple s = tuple
-  where
-    list = split "," s
-    tuple = (strip(head list), strip(head(tail list)), strip(head(tail(tail(list)))))
+toTuple :: [a] -> (a, a, a)
+toTuple [x, y, z] = (x, y, z)
 
 isNotBlank :: String -> Bool
 isNotBlank s = not $ all isSpace s
