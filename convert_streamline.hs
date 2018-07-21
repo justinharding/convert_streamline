@@ -1,6 +1,7 @@
 import Data.Char (isSpace)
 import Data.List (isInfixOf)
 import Data.List.Utils
+import Data.String.Utils
 
 type Transaction = (String, String, String, String)
 
@@ -10,15 +11,16 @@ main = do
   let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
   -- mapM_ (printTransaction decorateLine decorateTransaction) transactions
   mapM_ (printTransaction "" (return ())) transactions
-  let newTransactions = map (modifyTransaction "MITRE 10" "Expenses:Misc" "Expenses:Hardware") transactions
-  -- mapM_ (printTransaction "" (return ())) newTransactions
 
-  let dictionary = [("MITRE 10", "Expenses:Misc", "Expenses:Hardware"), ("TOKEN FEE", "Expenses:Misc", "Expenses:BankFee")]
+  dictionary <- loadDictionary
+  -- let dictionary = [("MITRE 10", "Expenses:Misc", "Expenses:Hardware"), ("TOKEN FEE", "Expenses:Misc", "Expenses:BankFee")]
   let newTransactions2 = map (doIt dictionary) transactions
   mapM_ (printTransaction "" (return ())) newTransactions2
 
 doIt :: [(String, String, String)] -> [String] -> [String]
-doIt dictionary transaction = foldr (\x y -> modifyTransactionWithTuple x transaction) transaction (filter (check transaction) dictionary)
+doIt dictionary transaction = foldr (\x y -> modifyTransactionWithTuple x transaction)
+                                transaction
+                                (filter (check transaction) dictionary)
 
 modifyTransactionWithTuple :: (String, String, String) -> [String] -> [String]
 modifyTransactionWithTuple tuple l = modifyTransaction (fst3 tuple) (snd3 tuple) (thd3 tuple) l
@@ -70,3 +72,28 @@ thd3 (_, _, x) = x
 decorateLine = "%%%"
 
 decorateTransaction = putStrLn ""
+
+
+loadDictionary = do
+    content <- readFile "translations.txt"
+    let stuff = convert $ filter isNotBlank $ lines content
+    -- mapM_ (putStrLn . fst3) stuff
+    return stuff
+
+convert :: [String] -> [(String, String, String)]
+convert list = map parse list
+
+parse :: String -> (String, String, String)
+parse s = makeTuple s
+
+valid :: String -> Bool
+valid s = isInfixOf s "," && (head s) /= '#'
+
+makeTuple :: String -> (String, String, String)
+makeTuple s = tuple
+  where
+    list = split "," s
+    tuple = (strip(head list), strip(head(tail list)), strip(head(tail(tail(list)))))
+
+isNotBlank :: String -> Bool
+isNotBlank s = not $ all isSpace s
