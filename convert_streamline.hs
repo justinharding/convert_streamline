@@ -10,22 +10,21 @@ main = do
   fileContent <- readFile "test.journal"
   let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
   -- mapM_ (printTransaction decorateLine decorateTransaction) transactions
-  mapM_ (printTransaction "" (return ())) transactions
+  -- mapM_ (printTransaction "" (return ())) transactions
 
   dictionary <- loadDictionary
   -- let dictionary = [("MITRE 10", "Expenses:Misc", "Expenses:Hardware"), ("TOKEN FEE", "Expenses:Misc", "Expenses:BankFee")]
-  let newTransactions2 = map (doIt dictionary) transactions
+  let newTransactions2 = map (modifyTransactionsWithDictionary dictionary) transactions
   mapM_ (printTransaction "" (return ())) newTransactions2
 
-doIt :: [(String, String, String)] -> [String] -> [String]
-doIt dictionary transaction = foldr (\x y -> modifyTransactionWithTuple x transaction)
+modifyTransactionsWithDictionary :: [(String, String, String)] -> [String] -> [String]
+modifyTransactionsWithDictionary dictionary transaction = foldr (\x y -> modifyTransactionWithTuple x transaction)
                                 transaction
                                 (filter (check transaction) dictionary)
 
 modifyTransactionWithTuple :: (String, String, String) -> [String] -> [String]
-modifyTransactionWithTuple tuple l = modifyTransaction (fst3 tuple) (snd3 tuple) (thd3 tuple) l
+modifyTransactionWithTuple tuple list = modifyTransaction (fst3 tuple) (snd3 tuple) (thd3 tuple) list
 
--- getTuple :: [(String, String, String)] -> (String, String, String)
 check :: [String] -> (String, String, String) -> Bool
 check x y = isInfixOf (fst3 y) (head x)
 
@@ -76,11 +75,10 @@ decorateTransaction = putStrLn ""
 
 loadDictionary = do
     content <- readFile "translations.txt"
-    let stuff = convert $ filter isNotBlank $ lines content
-    return stuff
+    return $ toTuples $ filter isNotBlank $ lines content
 
-convert :: [String] -> [(String, String, String)]
-convert list = map parse list
+toTuples :: [String] -> [(String, String, String)]
+toTuples list = map parse list
 
 parse :: String -> (String, String, String)
 parse = toTuple . map strip . split ","
@@ -93,3 +91,4 @@ toTuple [x, y, z] = (x, y, z)
 
 isNotBlank :: String -> Bool
 isNotBlank s = not $ all isSpace s
+
