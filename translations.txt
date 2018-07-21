@@ -1,0 +1,4 @@
+MITRE 10, Expenses:Misc, Expenses:Hardware
+TOKEN FEE, Expenses:Misc, Expenses:BankFee
+
+
