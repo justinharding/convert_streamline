@@ -1,3 +1,4 @@
+import System.Environment
 import Data.Char (isSpace)
 import Data.List (isInfixOf)
 import Data.List.Utils
@@ -7,15 +8,26 @@ type Transaction = (String, String, String, String)
 
 main :: IO ()
 main = do
-  fileContent <- readFile "test.journal"
+  args <- getArgs
+  fileContent <- readFile (last args)
+  -- fileContent <- readFile "test.journal"
   let transactions = splitIntoTransactions isFirstLineOfTransaction $ lines fileContent
   -- mapM_ (printTransaction decorateLine decorateTransaction) transactions
   -- mapM_ (printTransaction "" (return ())) transactions
 
-  dictionary <- loadDictionary
+  dictionary <- loadDictionary (head args)
   -- let dictionary = [("MITRE 10", "Expenses:Misc", "Expenses:Hardware"), ("TOKEN FEE", "Expenses:Misc", "Expenses:BankFee")]
   let newTransactions2 = map (modifyTransactionsWithDictionary dictionary) transactions
   mapM_ (printTransaction "" (return ())) newTransactions2
+
+
+-- parseCommandLine ["-h"] = usage >> exit
+-- parseCommandLine ["-v"] = version >> exit
+-- parseCommandLine fs = readFile fs
+--
+-- usage = putStrLn "Usage: translate [-vh] [file ...]"
+-- version = putStrLn "Haskell translate 1.0"
+-- exit = exitWith ExitSuccess
 
 modifyTransactionsWithDictionary :: [(String, String, String)] -> [String] -> [String]
 modifyTransactionsWithDictionary dictionary transaction = foldr (\x y -> modifyTransactionWithTuple x transaction)
@@ -73,8 +85,9 @@ decorateLine = "%%%"
 decorateTransaction = putStrLn ""
 
 
-loadDictionary = do
-    content <- readFile "translations.txt"
+loadDictionary fileName = do
+    -- content <- readFile "translations.txt"
+    content <- readFile fileName
     return $ toTuples $ filter isNotBlank $ lines content
 
 toTuples :: [String] -> [(String, String, String)]
